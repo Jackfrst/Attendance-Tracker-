@@ -46,6 +46,24 @@
     <input type="text" id="sheetUrlInput" class="text-input" placeholder="https://docs.google.com/spreadsheets/d/..." />
     <label class="field-label">Tab name (bottom of the sheet)</label>
     <input type="text" id="sheetTabInput" class="text-input" placeholder="Sheet1" />
+    <label class="field-label">Attendance layout</label>
+    <div id="layoutOptions" class="layout-options">
+      <label class="layout-option">
+        <input type="radio" name="layoutType" value="normal" checked />
+        <span>
+          <strong>Normal</strong>
+          <small>Serial–ID–Name in A–C, dates D→AE, rows 5–44, mark from AG.</small>
+        </span>
+      </label>
+      <label class="layout-option">
+        <input type="radio" name="layoutType" value="lab" />
+        <span>
+          <strong>Lab-style</strong>
+          <small>Serial–ID in A–B, Name in C, dates D→Q, rows 5–43, marks from R/S/T.</small>
+        </span>
+      </label>
+    </div>
+    <p class="field-hint">Changing the layout of an existing section only changes how the app reads/writes it — it never edits the sheet's existing columns.</p>
     <p id="sheetModalStatus" class="status-line"></p>
     <div class="modal-actions">
       <button id="sheetModalCancel" class="btn btn-ghost">Cancel</button>
