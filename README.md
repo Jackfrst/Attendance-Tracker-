@@ -4,7 +4,7 @@ A tiny static web app for taking daily attendance and saving it straight into yo
 Google Sheet. No backend/server — it runs entirely in the browser and talks to the
 Google Sheets API using your own Google sign-in, so it deploys for free on GitHub Pages.
 
-**How it matches your sheet (Normal layout, the default):**
+**How it matches your sheet:**
 - `A5:A` — serial numbers
 - `B5:B` — student ID
 - `C5:C` — student name
@@ -16,34 +16,20 @@ Google Sheets API using your own Google sign-in, so it deploys for free on GitHu
   now, and the app just shows it next to each student while taking or reviewing
   attendance.
 
-A second **Lab-style** layout is also built in for sheets shaped differently — see
-below.
-
 **Safety rule built in:** if a date column already has any attendance saved, the app
 opens it in **read-only** mode showing who was present/absent, and will not let you
 overwrite it. Before saving, it also re-checks the column is still empty (in case two
 people submit at once).
 
 **Multiple sections:** the app can hold several sheets (e.g. "Section A", "Section B"),
-each with its own spreadsheet link, tab name, **and layout**. Switch between them with
-the tabs under the header; add a new one with **+ Add section**, change the current
-one's link/layout with **Change link**, or delete any tab you don't need anymore with
-the **×** on it (you'll be asked to confirm — this only removes it from the app, never
-touches the actual spreadsheet). These are remembered in the browser
-(`localStorage`), so each device/browser you use keeps its own list — add the same
-sections again on any new device or browser you take attendance from. You always need
-at least one section, so the last remaining one can't be deleted.
-
-**Two layouts to choose from when adding a section:**
-- **Normal** — your original layout: Serial in A, ID in B, Name in C, one date per
-  column D→AE, students in rows 5–44, attendance mark read from AG.
-- **Lab-style** — matches a "7th Semester Lab" style sheet: Serial in A, ID in B,
-  Name in C, one date per column D→Q, students in rows 5–43 (row 44 reserved for a
-  TOTAL row), and three read-only columns shown together as the "Mark" for each
-  student: `#Att-Total` (R), `Att-Marks(10)` (S), and `Percentage%` (T).
-
-If your sheets are arranged a little differently from either preset, tell me the exact
-columns/rows and I can add a third layout (or make the fields fully custom).
+each with its own spreadsheet link and tab name. Switch between them with the tabs
+under the header; add a new one with **+ Add section**, change the current one's link
+with **Change link**, or delete any tab you don't need anymore with the **×** on it
+(you'll be asked to confirm — this only removes it from the app, never touches the
+actual spreadsheet). These are remembered in the browser (`localStorage`), so each
+device/browser you use keeps its own list — add the same sections again on any new
+device or browser you take attendance from. You always need at least one section, so
+the last remaining one can't be deleted.
 
 **Absence warnings:** when you open a date to take attendance, each student who missed
 recent classes gets a small badge next to their name, based on consecutive classes
