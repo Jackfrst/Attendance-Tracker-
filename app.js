@@ -118,12 +118,44 @@ function renderSheetTabs() {
   const wrap = el("sheetTabs");
   wrap.innerHTML = "";
   profiles.forEach((p) => {
-    const btn = document.createElement("button");
-    btn.className = "sheet-tab" + (p.id === activeProfileId ? " active" : "");
-    btn.textContent = p.label;
-    btn.addEventListener("click", () => switchSheet(p.id));
-    wrap.appendChild(btn);
+    const tab = document.createElement("span");
+    tab.className = "sheet-tab" + (p.id === activeProfileId ? " active" : "");
+
+    const label = document.createElement("button");
+    label.type = "button";
+    label.className = "sheet-tab-label";
+    label.textContent = p.label;
+    label.addEventListener("click", () => switchSheet(p.id));
+    tab.appendChild(label);
+
+    if (profiles.length > 1) {
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "sheet-tab-delete";
+      del.setAttribute("aria-label", `Delete ${p.label}`);
+      del.textContent = "×";
+      del.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deleteProfile(p.id);
+      });
+      tab.appendChild(del);
+    }
+
+    wrap.appendChild(tab);
   });
+}
+
+function deleteProfile(id) {
+  const p = profiles.find((x) => x.id === id);
+  if (!p || profiles.length <= 1) return;
+  const ok = confirm(`Remove "${p.label}" from this app? This only removes it from your browser's list — the spreadsheet itself is untouched.`);
+  if (!ok) return;
+  profiles = profiles.filter((x) => x.id !== id);
+  persistProfiles();
+  renderSheetTabs();
+  if (activeProfileId === id) {
+    switchSheet(profiles[0].id);
+  }
 }
 
 async function switchSheet(id) {

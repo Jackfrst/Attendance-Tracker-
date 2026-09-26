@@ -23,10 +23,13 @@ people submit at once).
 
 **Multiple sections:** the app can hold several sheets (e.g. "Section A", "Section B"),
 each with its own spreadsheet link and tab name. Switch between them with the tabs
-under the header; add a new one with **+ Add section**, or change the current one's
-link with **Change link**. These are remembered in the browser (`localStorage`), so
-each device/browser you use keeps its own list — add the same sections again on any
-new device or browser you take attendance from.
+under the header; add a new one with **+ Add section**, change the current one's link
+with **Change link**, or delete any tab you don't need anymore with the **×** on it
+(you'll be asked to confirm — this only removes it from the app, never touches the
+actual spreadsheet). These are remembered in the browser (`localStorage`), so each
+device/browser you use keeps its own list — add the same sections again on any new
+device or browser you take attendance from. You always need at least one section, so
+the last remaining one can't be deleted.
 
 **Absence warnings:** when you open a date to take attendance, each student who missed
 recent classes gets a small badge next to their name, based on consecutive classes
@@ -134,6 +137,15 @@ trailing path) is listed under **Authorized JavaScript origins**.
 - Click any tab to switch to that section; the roster and dates reload automatically.
 - Removing a section (from the **Change link** dialog) only removes it from this
   browser's list — it never touches the spreadsheet itself.
+
+## Mobile
+
+The app is fully responsive — sign-in, the section tabs, date picker, and the
+roster table all adapt to a phone screen, with large tap targets for the checkboxes
+and buttons. The roster table scrolls horizontally on very narrow screens instead of
+squeezing columns unreadably. No extra setup needed; open the same deployed link on
+your phone's browser. If you want a one-tap icon on your home screen, use your
+phone browser's "Add to Home Screen" option after opening the site.
 
 ## Notes / limitations
 
