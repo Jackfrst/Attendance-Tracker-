@@ -155,3 +155,65 @@ body {
   .panel { padding: 22px; }
   .take-header { flex-direction: column; }
 }
+
+/* ---------- Logo ---------- */
+.brand-logo { width: 26px; height: 26px; object-fit: contain; border-radius: 4px; }
+
+/* ---------- Sheets bar ---------- */
+.sheets-bar { background: var(--accent-soft); border-bottom: 1px solid var(--line); }
+.sheets-bar-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: -apple-system, sans-serif;
+}
+.sheet-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.sheet-tab {
+  font-family: -apple-system, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.sheet-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.sheet-actions { display: flex; gap: 8px; }
+
+/* ---------- Modal ---------- */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(27,36,48,0.45);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 50;
+}
+.modal {
+  background: var(--card); border-radius: var(--radius); padding: 28px;
+  width: 100%; max-width: 420px; font-family: -apple-system, sans-serif;
+}
+.modal-title { margin: 0 0 18px; font-size: 1.2rem; font-family: inherit; }
+.field-label { display: block; font-size: 0.8rem; color: var(--ink-soft); margin: 14px 0 6px; }
+.text-input {
+  width: 100%; font-family: inherit; font-size: 0.92rem;
+  padding: 9px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink);
+}
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+.btn-danger { color: #a33; border-color: #e3c9c9; }
+
+/* ---------- Warning badges ---------- */
+.warn-badge {
+  display: inline-block; margin-left: 8px; padding: 2px 9px;
+  border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+  font-family: -apple-system, sans-serif; vertical-align: middle;
+}
+.warn-1 { background: #fbf1e2; color: #8a5a1c; }
+.warn-2 { background: #fbe5cf; color: #9a4a10; }
+.warn-3 { background: #fadbdb; color: #a3312e; }
+
+.mark-cell { font-family: -apple-system, sans-serif; font-size: 0.85rem; color: var(--ink-soft); }

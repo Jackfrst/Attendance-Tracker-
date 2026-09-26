@@ -11,7 +11,8 @@
 <header class="topbar">
   <div class="topbar-inner">
     <div class="brand">
-      <span class="brand-mark">◆</span>
+      <img id="logoImg" class="brand-logo hidden" alt="logo" />
+      <span id="logoFallback" class="brand-mark">◆</span>
       <span class="brand-name">Roll Call</span>
     </div>
     <div id="authArea" class="auth-area">
@@ -22,7 +23,37 @@
       </div>
     </div>
   </div>
+
+  <!-- Sheet / section switcher -->
+  <div id="sheetsBar" class="sheets-bar hidden">
+    <div class="sheets-bar-inner">
+      <div id="sheetTabs" class="sheet-tabs"></div>
+      <div class="sheet-actions">
+        <button id="editSheetBtn" class="btn btn-ghost btn-sm">Change link</button>
+        <button id="addSheetBtn" class="btn btn-ghost btn-sm">+ Add section</button>
+      </div>
+    </div>
+  </div>
 </header>
+
+<!-- Add / edit sheet modal -->
+<div id="sheetModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h2 id="sheetModalTitle" class="modal-title">Add a section sheet</h2>
+    <label class="field-label">Label (e.g. "Section B")</label>
+    <input type="text" id="sheetLabelInput" class="text-input" placeholder="Section B" />
+    <label class="field-label">Google Sheet link or ID</label>
+    <input type="text" id="sheetUrlInput" class="text-input" placeholder="https://docs.google.com/spreadsheets/d/..." />
+    <label class="field-label">Tab name (bottom of the sheet)</label>
+    <input type="text" id="sheetTabInput" class="text-input" placeholder="Sheet1" />
+    <p id="sheetModalStatus" class="status-line"></p>
+    <div class="modal-actions">
+      <button id="sheetModalCancel" class="btn btn-ghost">Cancel</button>
+      <button id="sheetModalRemove" class="btn btn-ghost btn-danger hidden">Remove this section</button>
+      <button id="sheetModalSave" class="btn btn-primary">Save</button>
+    </div>
+  </div>
+</div>
 
 <main class="main">
 
@@ -34,7 +65,7 @@
   <!-- STEP 1: pick date -->
   <section id="dateStep" class="panel hidden">
     <h1 class="panel-title">Select a date</h1>
-    <p class="panel-sub">Choose the class date you want to take attendance for.</p>
+    <p class="panel-sub" id="activeSheetLabel"></p>
     <div class="date-row">
       <input type="date" id="dateInput" class="date-input" />
       <button id="loadDateBtn" class="btn btn-primary">Continue</button>
@@ -47,7 +78,7 @@
     <h1 class="panel-title">Attendance already recorded</h1>
     <p class="panel-sub" id="alreadyDateLabel"></p>
     <div class="notice notice-warn">
-      This date already has attendance saved in the sheet, so it will not be overwritten.
+      This date already has attendance saved in the sheet, so it will not be overwritten. Shown below for reference.
     </div>
     <table class="roster-table" id="readonlyTable">
       <thead><tr><th>#</th><th>ID</th><th>Name</th><th>Status</th></tr></thead>

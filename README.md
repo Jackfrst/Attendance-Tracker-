@@ -8,12 +8,31 @@ Google Sheets API using your own Google sign-in, so it deploys for free on GitHu
 - `A5:A` — serial numbers
 - `B5:B` — student ID
 - `C5:C` — student name
-- `D4:AE4` — one date per column (row 4)
+- `D4:AE4` — one date per column (row 4), saved as `14-Sep-26`
 - `D5:AE44` — attendance grid (`1` = present, blank = absent)
+- `AG5:AG44` — running attendance percentage per student, recalculated after every save
 
 **Safety rule built in:** if a date column already has any attendance saved, the app
-opens it in **read-only** mode and will not let you overwrite it. Before saving, it
-also re-checks the column is still empty (in case two people submit at once).
+opens it in **read-only** mode showing who was present/absent, and will not let you
+overwrite it. Before saving, it also re-checks the column is still empty (in case two
+people submit at once).
+
+**Multiple sections:** the app can hold several sheets (e.g. "Section A", "Section B"),
+each with its own spreadsheet link and tab name. Switch between them with the tabs
+under the header; add a new one with **+ Add section**, or change the current one's
+link with **Change link**. These are remembered in the browser (`localStorage`), so
+each device/browser you use keeps its own list — add the same sections again on any
+new device or browser you take attendance from.
+
+**Absence warnings:** when you open a date to take attendance, each student who missed
+recent classes gets a small badge next to their name, based on consecutive classes
+missed immediately before this one: 1 missed class, 2 in a row, or 3+ in a row (each
+a different color). This only looks at previously *recorded* dates — it doesn't count
+class days that haven't been taken yet.
+
+**Logo:** drop a `logo.png` file into the project folder (next to `index.html`) and it
+will automatically appear in the header. If no `logo.png` is present, a plain diamond
+mark is shown instead — nothing to configure either way.
 
 ---
 
@@ -45,15 +64,23 @@ Open `config.js` and set:
 
 ```js
 CLIENT_ID: "your-client-id.apps.googleusercontent.com",
-SPREADSHEET_ID: "16j8MJ9roVxDaYpLeK6syVE08Upp3qXqVifK-ikmrb2Y", // already filled in
-SHEET_NAME: "Sheet1", // must match your actual tab name exactly
+DEFAULT_SHEET_LABEL: "Section A",
+DEFAULT_SPREADSHEET_ID: "16j8MJ9roVxDaYpLeK6syVE08Upp3qXqVifK-ikmrb2Y", // already filled in
+DEFAULT_SHEET_NAME: "Sheet1", // must match your actual tab name exactly
 ```
 
-The row/column numbers (`FIRST_STUDENT_ROW`, `LAST_DATE_COL`, etc.) already match the
-layout you described. Only change them if your sheet structure is different.
+This is just the **first** sheet you'll see when you open the app — add Section B, C,
+etc. from inside the app itself with **+ Add section**, no code changes needed for
+those.
+
+The row/column numbers (`FIRST_STUDENT_ROW`, `LAST_DATE_COL`, `MARK_COL`, etc.) apply
+to **every** section sheet you add, so all your section sheets need the same layout
+(serials in A, IDs in B, names in C, dates in row 4 from D onward, AG reserved for the
+attendance percentage). Only change them if your sheet structure is different.
 
 > If your class list ever grows past row 44, or you need more than 28 date columns
-> (D→AE), update `LAST_STUDENT_ROW` / `LAST_DATE_COL` in `config.js` to match.
+> (D→AE), update `LAST_STUDENT_ROW` / `LAST_DATE_COL` in `config.js` to match, and move
+> `MARK_COL` further right if it would now overlap a date column.
 
 ## 4. Deploy on GitHub Pages
 
@@ -83,6 +110,17 @@ trailing path) is listed under **Authorized JavaScript origins**.
    - If attendance for that date already exists, you'll see it read-only instead.
 3. Toggle each student (all default to present — use **Mark all absent** to flip
    the default if that's easier for your class), then **Save attendance**.
+
+## Adding or switching sections
+
+- **+ Add section**: give it a label (e.g. "Section B"), paste the full Google Sheet
+  link (or just the ID), and the tab name — then **Save**. It's added to the tabs and
+  becomes active immediately.
+- **Change link**: edit the currently active section's link/tab without adding a new
+  one — handy if you paste the wrong sheet or rename a tab.
+- Click any tab to switch to that section; the roster and dates reload automatically.
+- Removing a section (from the **Change link** dialog) only removes it from this
+  browser's list — it never touches the spreadsheet itself.
 
 ## Notes / limitations
 
