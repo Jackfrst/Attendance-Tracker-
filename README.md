@@ -81,7 +81,7 @@ Open `config.js` and set:
 ```js
 CLIENT_ID: "your-client-id.apps.googleusercontent.com",
 DEFAULT_SHEET_LABEL: "Section A",
-DEFAULT_SPREADSHEET_ID: "16j8MJ9roVxDaYpLeK6syVE08Upp3qXqVifK-ikmrb2Y", // already filled in
+DEFAULT_SPREADSHEET_ID: "", //fill
 DEFAULT_SHEET_NAME: "Sheet1", // must match your actual tab name exactly
 ```
 
