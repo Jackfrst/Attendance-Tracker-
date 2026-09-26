@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Attendance Taker</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">◆</span>
+      <span class="brand-name">Roll Call</span>
+    </div>
+    <div id="authArea" class="auth-area">
+      <button id="signInBtn" class="btn btn-primary">Sign in with Google</button>
+      <div id="signedInArea" class="signed-in-area hidden">
+        <span id="userEmail" class="user-email"></span>
+        <button id="signOutBtn" class="btn btn-ghost">Sign out</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- STEP 0: not signed in -->
+  <section id="gate" class="panel center-panel">
+    <p class="lede">Sign in with the Google account that owns the attendance spreadsheet to begin.</p>
+  </section>
+
+  <!-- STEP 1: pick date -->
+  <section id="dateStep" class="panel hidden">
+    <h1 class="panel-title">Select a date</h1>
+    <p class="panel-sub">Choose the class date you want to take attendance for.</p>
+    <div class="date-row">
+      <input type="date" id="dateInput" class="date-input" />
+      <button id="loadDateBtn" class="btn btn-primary">Continue</button>
+    </div>
+    <p id="dateStatus" class="status-line"></p>
+  </section>
+
+  <!-- STEP 2: already recorded, read-only -->
+  <section id="alreadyStep" class="panel hidden">
+    <h1 class="panel-title">Attendance already recorded</h1>
+    <p class="panel-sub" id="alreadyDateLabel"></p>
+    <div class="notice notice-warn">
+      This date already has attendance saved in the sheet, so it will not be overwritten.
+    </div>
+    <table class="roster-table" id="readonlyTable">
+      <thead><tr><th>#</th><th>ID</th><th>Name</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <button id="backFromAlready" class="btn btn-ghost">Choose a different date</button>
+  </section>
+
+  <!-- STEP 3: take attendance -->
+  <section id="takeStep" class="panel hidden">
+    <div class="take-header">
+      <div>
+        <h1 class="panel-title" id="takeDateLabel">Take attendance</h1>
+        <p class="panel-sub" id="takeSub"></p>
+      </div>
+      <div class="bulk-actions">
+        <button id="markAllPresent" class="btn btn-ghost btn-sm">Mark all present</button>
+        <button id="markAllAbsent" class="btn btn-ghost btn-sm">Mark all absent</button>
+      </div>
+    </div>
+
+    <table class="roster-table" id="rosterTable">
+      <thead><tr><th>#</th><th>ID</th><th>Name</th><th>Present</th></tr></thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="submit-row">
+      <span id="countLabel" class="count-label"></span>
+      <button id="submitBtn" class="btn btn-primary">Save attendance</button>
+    </div>
+    <p id="takeStatus" class="status-line"></p>
+  </section>
+
+  <!-- STEP 4: success -->
+  <section id="doneStep" class="panel center-panel hidden">
+    <div class="notice notice-success" id="doneMessage"></div>
+    <button id="takeAnotherBtn" class="btn btn-primary">Take attendance for another date</button>
+  </section>
+
+</main>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
