@@ -4,14 +4,14 @@
 const CONFIG = {
   // OAuth 2.0 Client ID from Google Cloud Console
   // (APIs & Services > Credentials > Create OAuth client ID > Web application)
-  CLIENT_ID: "YOUR_CLIENT_ID.apps.googleusercontent.com",
+  CLIENT_ID: "163116448655-u1bk1bdadu6tsmcf40lj2ceedsio8v0a.apps.googleusercontent.com",
 
   // ---- Default sheet, shown the very first time the app is opened.
   // After that, sheets you add/switch to in the app are remembered in the
   // browser (localStorage), and you can edit or add more from the UI.
   DEFAULT_SHEET_LABEL: "Section A",
   DEFAULT_SPREADSHEET_ID: "16j8MJ9roVxDaYpLeK6syVE08Upp3qXqVifK-ikmrb2Y",
-  DEFAULT_SHEET_NAME: "Sheet1",
+  DEFAULT_SHEET_NAME: "7th Theory",
 
   // Sheet layout — must be identical across every section sheet you add.
   FIRST_STUDENT_ROW: 5, // B5 = first student ID, C5 = first student name
