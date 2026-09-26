@@ -11,7 +11,7 @@ const CONFIG = {
   // browser (localStorage), and you can edit or add more from the UI.
   DEFAULT_SHEET_LABEL: "Section A",
   DEFAULT_SPREADSHEET_ID: "16j8MJ9roVxDaYpLeK6syVE08Upp3qXqVifK-ikmrb2Y",
-  DEFAULT_SHEET_NAME: "7th Theory",
+  DEFAULT_SHEET_NAME: "Section A",
 
   // Sheet layout — must be identical across every section sheet you add.
   FIRST_STUDENT_ROW: 5, // B5 = first student ID, C5 = first student name
