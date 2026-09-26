@@ -4,14 +4,14 @@
 const CONFIG = {
   // OAuth 2.0 Client ID from Google Cloud Console
   // (APIs & Services > Credentials > Create OAuth client ID > Web application)
-  CLIENT_ID: "YOUR_CLIENT_ID.apps.googleusercontent.com",
+  CLIENT_ID: "163116448655-u1bk1bdadu6tsmcf40lj2ceedsio8v0a.apps.googleusercontent.com",
 
   // The long ID in your sheet's URL:
   // https://docs.google.com/spreadsheets/d/ >>THIS PART<< /edit
   SPREADSHEET_ID: "16j8MJ9roVxDaYpLeK6syVE08Upp3qXqVifK-ikmrb2Y",
 
   // The tab name at the bottom of the spreadsheet (e.g. "Sheet1")
-  SHEET_NAME: "Sheet1",
+  SHEET_NAME: "CSE 4101 A",
 
   // Sheet layout (matches the structure you described).
   // Change these only if your sheet layout differs.
