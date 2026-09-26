@@ -10,7 +10,11 @@ Google Sheets API using your own Google sign-in, so it deploys for free on GitHu
 - `C5:C` — student name
 - `D4:AE4` — one date per column (row 4), saved as `14-Sep-26`
 - `D5:AE44` — attendance grid (`1` = present, blank = absent)
-- `AG5:AG44` — running attendance percentage per student, recalculated after every save
+- `AG5:AG44` — attendance mark per student. The app **never writes to this column** —
+  it only reads and displays whatever value is already there, so if you have a formula
+  in AG (e.g. a percentage calculated from D:AE), it keeps working exactly as it does
+  now, and the app just shows it next to each student while taking or reviewing
+  attendance.
 
 **Safety rule built in:** if a date column already has any attendance saved, the app
 opens it in **read-only** mode showing who was present/absent, and will not let you

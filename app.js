@@ -391,7 +391,7 @@ async function handleDateChosen() {
       const existing = await getRange(`${p.sheetName}!${colLetter}${FIRST_STUDENT_ROW}:${colLetter}${LAST_STUDENT_ROW}`);
       const hasData = existing.some((r) => r[0] !== undefined && r[0].toString().trim() !== "");
       if (hasData) {
-        showAlreadyRecorded(existing);
+        await showAlreadyRecorded(existing);
       } else {
         await openTakeStep();
       }
@@ -405,23 +405,29 @@ async function handleDateChosen() {
 function setDateStatus(msg) { el("dateStatus").textContent = msg; }
 
 /* ---------- Step: already recorded (read-only) ---------- */
-function showAlreadyRecorded(existingValues) {
+async function showAlreadyRecorded(existingValues) {
   el("alreadyDateLabel").textContent = currentDateLabel;
+  showStep("alreadyStep");
+
+  let marks = {};
+  try { marks = await fetchMarks(); } catch (e) { /* non-fatal */ }
+
   const tbody = el("readonlyTable").querySelector("tbody");
   tbody.innerHTML = "";
   roster.forEach((s, i) => {
     const val = (existingValues[i] && existingValues[i][0]) || "";
     const present = val.toString().trim() === "1";
+    const mark = marks[s.row] || "—";
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${s.serial}</td>
       <td>${s.id}</td>
       <td>${s.name}</td>
       <td><span class="status-pill ${present ? "status-present" : "status-absent"}">${present ? "Present" : "Absent"}</span></td>
+      <td class="mark-cell">${mark}</td>
     `;
     tbody.appendChild(tr);
   });
-  showStep("alreadyStep");
 }
 
 /* ---------- Absence-streak warnings ---------- */
@@ -474,18 +480,21 @@ async function openTakeStep() {
   showStep("takeStep");
 
   let warnings = {};
-  try { warnings = await computeWarnings(); } catch (e) { /* non-fatal */ }
+  let marks = {};
+  try { [warnings, marks] = await Promise.all([computeWarnings(), fetchMarks()]); } catch (e) { /* non-fatal */ }
 
   const tbody = el("rosterTable").querySelector("tbody");
   tbody.innerHTML = "";
   roster.forEach((s) => {
     const w = warnings[s.row];
     const badge = w ? `<span class="warn-badge ${w.cls}">${w.label}</span>` : "";
+    const mark = marks[s.row] || "—";
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${s.serial}</td>
       <td>${s.id}</td>
       <td>${s.name}${badge}</td>
+      <td class="mark-cell">${mark}</td>
       <td><input type="checkbox" class="present-toggle" data-row="${s.row}" checked /></td>
     `;
     tbody.appendChild(tr);
@@ -506,31 +515,21 @@ function updateCountLabel() {
   el("countLabel").textContent = `${presentCount} present · ${boxes.length - presentCount} absent · ${boxes.length} total`;
 }
 
-/* ---------- Attendance-percentage column (AG) ---------- */
-async function recomputeMarks() {
+/* ---------- Attendance mark column (AG) — READ ONLY ----------
+   The sheet itself calculates this (e.g. a formula in AG). The app never
+   writes to it; it only fetches the current values to display next to
+   each student. */
+async function fetchMarks() {
   const p = getActiveProfile();
-  const { FIRST_DATE_COL, LAST_DATE_COL, FIRST_STUDENT_ROW, LAST_STUDENT_ROW, MARK_COL, DATE_ROW } = CONFIG;
-
-  const firstLetter = colToLetter(FIRST_DATE_COL);
-  const lastLetter = colToLetter(LAST_DATE_COL);
-  const headers = (await getRange(`${p.sheetName}!${firstLetter}${DATE_ROW}:${lastLetter}${DATE_ROW}`))[0] || [];
-  const heldOffsets = [];
-  for (let i = 0; i < (LAST_DATE_COL - FIRST_DATE_COL + 1); i++) {
-    if (headers[i] && headers[i].toString().trim() !== "") heldOffsets.push(i);
-  }
-
-  const grid = await getRange(`${p.sheetName}!${firstLetter}${FIRST_STUDENT_ROW}:${lastLetter}${LAST_STUDENT_ROW}`);
-  const values = [];
-  for (let r = FIRST_STUDENT_ROW; r <= LAST_STUDENT_ROW; r++) {
-    const rowValues = grid[r - FIRST_STUDENT_ROW] || [];
-    let present = 0;
-    heldOffsets.forEach((off) => { if ((rowValues[off] || "").toString().trim() === "1") present++; });
-    const pct = heldOffsets.length ? Math.round((present / heldOffsets.length) * 1000) / 10 : 0;
-    values.push([heldOffsets.length ? `${pct}%` : ""]);
-  }
-
+  const { FIRST_STUDENT_ROW, LAST_STUDENT_ROW, MARK_COL } = CONFIG;
   const markLetter = colToLetter(MARK_COL);
-  await putRange(`${p.sheetName}!${markLetter}${FIRST_STUDENT_ROW}:${markLetter}${LAST_STUDENT_ROW}`, values);
+  const rows = await getRange(`${p.sheetName}!${markLetter}${FIRST_STUDENT_ROW}:${markLetter}${LAST_STUDENT_ROW}`);
+  const marks = {};
+  for (let r = FIRST_STUDENT_ROW; r <= LAST_STUDENT_ROW; r++) {
+    const v = rows[r - FIRST_STUDENT_ROW];
+    marks[r] = v && v[0] !== undefined ? v[0].toString() : "";
+  }
+  return marks;
 }
 
 async function submitAttendance() {
@@ -559,8 +558,6 @@ async function submitAttendance() {
       values.push([byRow[r] !== undefined ? byRow[r] : ""]);
     }
     await putRange(`${p.sheetName}!${colLetter}${FIRST_STUDENT_ROW}:${colLetter}${LAST_STUDENT_ROW}`, values);
-
-    try { await recomputeMarks(); } catch (e) { /* non-fatal, marks can be refreshed later */ }
 
     const presentCount = Array.from(boxes).filter((b) => b.checked).length;
     el("doneMessage").textContent = `Saved attendance for ${currentDateLabel} — ${presentCount} of ${boxes.length} present.`;
