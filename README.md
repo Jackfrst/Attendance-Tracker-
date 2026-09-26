@@ -34,6 +34,15 @@ missed immediately before this one: 1 missed class, 2 in a row, or 3+ in a row (
 a different color). This only looks at previously *recorded* dates — it doesn't count
 class days that haven't been taken yet.
 
+**Staying signed in:** after your first sign-in, the app remembers that in this
+browser and quietly re-authenticates on every future visit — no click needed, as
+long as your Google session is still active and you haven't revoked access. If that
+silent attempt fails (session expired, access revoked, or third-party cookies
+blocked), it falls back to showing the normal **Sign in with Google** button. **Sign
+out** clears this and always asks you to sign in again next time. This only remembers
+the *device/browser*, not the person — if you use a shared computer, still sign out
+when you're done.
+
 **Logo:** drop a `logo.png` file into the project folder (next to `index.html`) and it
 will automatically appear in the header. If no `logo.png` is present, a plain diamond
 mark is shown instead — nothing to configure either way.

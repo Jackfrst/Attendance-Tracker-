@@ -212,6 +212,25 @@ function el_ready(fn) {
 }
 
 /* ---------- Google Identity Services ---------- */
+// GIS access tokens expire (~1 hour) and initTokenClient always needs a
+// tokenClient set up on each page load, but we can skip the *visible*
+// sign-in screen: once the person has signed in once, we remember that in
+// this browser and try a silent (no popup) token request automatically on
+// every future visit, only falling back to the "Sign in with Google"
+// button if that silent attempt doesn't succeed (e.g. consent was revoked,
+// or third-party cookies are blocked).
+const HAS_SIGNED_IN_KEY = "rollcall_has_signed_in";
+
+function requestToken(promptValue) {
+  return new Promise((resolve, reject) => {
+    tokenClient.callback = (resp) => {
+      if (resp.error) reject(resp);
+      else resolve(resp.access_token);
+    };
+    tokenClient.requestAccessToken({ prompt: promptValue });
+  });
+}
+
 window.addEventListener("load", () => {
   loadProfiles();
 
@@ -230,23 +249,23 @@ window.addEventListener("load", () => {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CONFIG.CLIENT_ID,
     scope: "https://www.googleapis.com/auth/spreadsheets",
-    callback: async (resp) => {
-      if (resp.error) {
-        setDateStatus("Sign-in failed: " + resp.error);
-        return;
-      }
-      accessToken = resp.access_token;
-      onSignedIn();
-    },
+    callback: () => {}, // overridden per-call by requestToken()
   });
 
-  el("signInBtn").addEventListener("click", () => {
-    tokenClient.requestAccessToken({ prompt: "consent" });
+  el("signInBtn").addEventListener("click", async () => {
+    try {
+      accessToken = await requestToken("consent");
+      localStorage.setItem(HAS_SIGNED_IN_KEY, "1");
+      onSignedIn();
+    } catch (e) {
+      setDateStatus("Sign-in failed: " + (e.error || e.message || "unknown error"));
+    }
   });
 
   el("signOutBtn").addEventListener("click", () => {
     if (accessToken) google.accounts.oauth2.revoke(accessToken, () => {});
     accessToken = null;
+    localStorage.removeItem(HAS_SIGNED_IN_KEY);
     location.reload();
   });
 
@@ -262,7 +281,35 @@ window.addEventListener("load", () => {
   });
 
   el("dateInput").valueAsDate = new Date();
+
+  // Try to resume the session quietly, without showing the sign-in screen.
+  if (localStorage.getItem(HAS_SIGNED_IN_KEY) === "1") {
+    el("lede").textContent = "Signing you back in…";
+    requestToken("")
+      .then((token) => {
+        accessToken = token;
+        onSignedIn();
+      })
+      .catch(() => {
+        // silent attempt failed (revoked, expired session, blocked cookies…) —
+        // fall back to asking the person to sign in normally.
+        el("lede").textContent = "Sign in with the Google account that owns the attendance spreadsheet to begin.";
+      });
+  }
 });
+
+// Re-authenticate silently and retry once if a request comes back
+// unauthorized (expired token mid-session).
+async function ensureFreshToken401Retry(fn) {
+  try {
+    return await fn();
+  } catch (e) {
+    if (!/^401/.test(e.message || "")) throw e;
+    accessToken = await requestToken("");
+    return fn();
+  }
+}
+
 
 async function onSignedIn() {
   el("signInBtn").classList.add("hidden");
@@ -291,14 +338,16 @@ async function onSignedIn() {
 
 /* ---------- Sheets API wrapper ---------- */
 async function sheetsFetch(url, options = {}) {
-  const opts = Object.assign({}, options);
-  opts.headers = Object.assign({}, opts.headers, { Authorization: `Bearer ${accessToken}` });
-  const res = await fetch(url, opts);
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`${res.status} ${res.statusText}: ${body.slice(0, 200)}`);
-  }
-  return res.json();
+  return ensureFreshToken401Retry(async () => {
+    const opts = Object.assign({}, options);
+    opts.headers = Object.assign({}, opts.headers, { Authorization: `Bearer ${accessToken}` });
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`${res.status} ${res.statusText}: ${body.slice(0, 200)}`);
+    }
+    return res.json();
+  });
 }
 
 async function getRange(a1Range) {
