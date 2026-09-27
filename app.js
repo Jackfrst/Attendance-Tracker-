@@ -38,6 +38,13 @@ function colToLetter(col) {
 
 function pad2(n) { return String(n).padStart(2, "0"); }
 
+// Sheet/tab names with spaces or special characters (e.g. "CSE 4102 Lab A")
+// must be single-quoted in A1 notation, with any literal quote doubled.
+// Quoting is safe even for plain names, so we always apply it.
+function quoteSheet(name) {
+  return `'${(name || "").replace(/'/g, "''")}'`;
+}
+
 /* ---------- Date parsing / formatting ---------- */
 // Sheet dates are written like "14-Sep-26". We also try to parse ISO and
 // other common formats in case older entries used something else.
@@ -431,7 +438,7 @@ async function loadRosterAndDates() {
 
   const maxRosterCol = Math.max(L.serialCol, L.idCol, L.nameCol);
   const scanToRow = L.firstStudentRow + ROW_GROWTH_SCAN;
-  const rosterRange = `${p.sheetName}!A${L.firstStudentRow}:${colToLetter(maxRosterCol)}${scanToRow}`;
+  const rosterRange = `${quoteSheet(p.sheetName)}!A${L.firstStudentRow}:${colToLetter(maxRosterCol)}${scanToRow}`;
   const rosterRows = await getRange(rosterRange);
 
   roster = [];
@@ -452,7 +459,7 @@ async function loadRosterAndDates() {
 
   const firstLetter = colToLetter(L.firstDateCol);
   const lastLetter = colToLetter(L.lastDateCol);
-  const dateRange = `${p.sheetName}!${firstLetter}${L.dateRow}:${lastLetter}${L.dateRow}`;
+  const dateRange = `${quoteSheet(p.sheetName)}!${firstLetter}${L.dateRow}:${lastLetter}${L.dateRow}`;
   const dateRows = await getRange(dateRange);
   dateHeaders = dateRows[0] || [];
 }
@@ -474,7 +481,7 @@ async function handleDateChosen() {
     const L = p.layout;
     const firstLetter = colToLetter(L.firstDateCol);
     const lastLetter = colToLetter(L.lastDateCol);
-    dateHeaders = (await getRange(`${p.sheetName}!${firstLetter}${L.dateRow}:${lastLetter}${L.dateRow}`))[0] || [];
+    dateHeaders = (await getRange(`${quoteSheet(p.sheetName)}!${firstLetter}${L.dateRow}:${lastLetter}${L.dateRow}`))[0] || [];
 
     let matchIndex = -1;
     for (let i = 0; i < dateHeaders.length; i++) {
@@ -495,13 +502,13 @@ async function handleDateChosen() {
       }
       currentColIndex = L.firstDateCol + emptyIndex;
       const colLetter = colToLetter(currentColIndex);
-      await putRange(`${p.sheetName}!${colLetter}${L.dateRow}`, [[formatDateForSheet(dt)]]);
+      await putRange(`${quoteSheet(p.sheetName)}!${colLetter}${L.dateRow}`, [[formatDateForSheet(dt)]]);
       dateHeaders[emptyIndex] = formatDateForSheet(dt);
       await openTakeStep();
     } else {
       currentColIndex = L.firstDateCol + matchIndex;
       const colLetter = colToLetter(currentColIndex);
-      const existing = await getRange(`${p.sheetName}!${colLetter}${L.firstStudentRow}:${colLetter}${L.lastStudentRow}`);
+      const existing = await getRange(`${quoteSheet(p.sheetName)}!${colLetter}${L.firstStudentRow}:${colLetter}${L.lastStudentRow}`);
       const hasData = existing.some((r) => r[0] !== undefined && r[0].toString().trim() !== "");
       if (hasData) {
         await showAlreadyRecorded(existing);
@@ -561,7 +568,7 @@ async function computeWarnings() {
 
   const firstLetter = colToLetter(L.firstDateCol);
   const lastLetter = colToLetter(currentColIndex - 1);
-  const grid = await getRange(`${p.sheetName}!${firstLetter}${L.firstStudentRow}:${lastLetter}${L.lastStudentRow}`);
+  const grid = await getRange(`${quoteSheet(p.sheetName)}!${firstLetter}${L.firstStudentRow}:${lastLetter}${L.lastStudentRow}`);
 
   heldCols.sort((a, b) => b - a); // most recent first
 
@@ -641,7 +648,7 @@ async function fetchMarks() {
 
   const perCol = await Promise.all(L.markCols.map(async (m) => {
     const letter = colToLetter(m.col);
-    const rows = await getRange(`${p.sheetName}!${letter}${L.firstStudentRow}:${letter}${L.lastStudentRow}`);
+    const rows = await getRange(`${quoteSheet(p.sheetName)}!${letter}${L.firstStudentRow}:${letter}${L.lastStudentRow}`);
     return { label: m.label, rows };
   }));
 
@@ -673,7 +680,7 @@ async function submitAttendance() {
   el("takeStatus").textContent = "Checking the column is still empty…";
 
   try {
-    const existing = await getRange(`${p.sheetName}!${colLetter}${L.firstStudentRow}:${colLetter}${L.lastStudentRow}`);
+    const existing = await getRange(`${quoteSheet(p.sheetName)}!${colLetter}${L.firstStudentRow}:${colLetter}${L.lastStudentRow}`);
     const hasData = existing.some((r) => r[0] !== undefined && r[0].toString().trim() !== "");
     if (hasData) {
       el("takeStatus").textContent = "Attendance for this date was just saved elsewhere, so this submission was blocked to avoid overwriting it.";
@@ -689,7 +696,7 @@ async function submitAttendance() {
     for (let r = L.firstStudentRow; r <= L.lastStudentRow; r++) {
       values.push([byRow[r] !== undefined ? byRow[r] : ""]);
     }
-    await putRange(`${p.sheetName}!${colLetter}${L.firstStudentRow}:${colLetter}${L.lastStudentRow}`, values);
+    await putRange(`${quoteSheet(p.sheetName)}!${colLetter}${L.firstStudentRow}:${colLetter}${L.lastStudentRow}`, values);
 
     const presentCount = Array.from(boxes).filter((b) => b.checked).length;
     el("doneMessage").textContent = `Saved attendance for ${currentDateLabel} — ${presentCount} of ${boxes.length} present.`;
