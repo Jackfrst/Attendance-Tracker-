@@ -4,17 +4,26 @@ A tiny static web app for taking daily attendance and saving it straight into yo
 Google Sheet. No backend/server — it runs entirely in the browser and talks to the
 Google Sheets API using your own Google sign-in, so it deploys for free on GitHub Pages.
 
-**How it matches your sheet:**
-- `A5:A` — serial numbers
-- `B5:B` — student ID
-- `C5:C` — student name
+**How it matches your sheets:**
+
+*Theory* (e.g. your original sheet):
+- `A5:A` — serial numbers, `B5:B` — student ID, `C5:C` — student name
 - `D4:AE4` — one date per column (row 4), saved as `14-Sep-26`
-- `D5:AE44` — attendance grid (`1` = present, blank = absent)
-- `AG5:AG44` — attendance mark per student. The app **never writes to this column** —
-  it only reads and displays whatever value is already there, so if you have a formula
-  in AG (e.g. a percentage calculated from D:AE), it keeps working exactly as it does
-  now, and the app just shows it next to each student while taking or reviewing
-  attendance.
+- `D5:AE?` — attendance grid (`1` = present, blank = absent) — rows run from 5
+  down to however many students that sheet actually has
+- `AG` column — attendance mark per student, next to each matching row
+
+*Lab* (e.g. your lab-classes sheet):
+- Same `A:C` roster columns
+- `D4:Q4` — one date per column
+- `D5:Q?` — attendance grid
+- `S` column — attendance mark per student
+
+Either way, the app **never writes to the mark column** — it only reads and displays
+whatever value is already there (e.g. a percentage formula), and it automatically
+finds the true last student row on each sheet, so a class with more or fewer students
+than usual — and a "total" row sitting right after the last student — are both handled
+without any configuration.
 
 **Safety rule built in:** if a date column already has any attendance saved, the app
 opens it in **read-only** mode showing who was present/absent, and will not let you
@@ -22,14 +31,29 @@ overwrite it. Before saving, it also re-checks the column is still empty (in cas
 people submit at once).
 
 **Multiple sections:** the app can hold several sheets (e.g. "Section A", "Section B"),
-each with its own spreadsheet link and tab name. Switch between them with the tabs
-under the header; add a new one with **+ Add section**, change the current one's link
-with **Change link**, or delete any tab you don't need anymore with the **×** on it
-(you'll be asked to confirm — this only removes it from the app, never touches the
-actual spreadsheet). These are remembered in the browser (`localStorage`), so each
-device/browser you use keeps its own list — add the same sections again on any new
-device or browser you take attendance from. You always need at least one section, so
-the last remaining one can't be deleted.
+each with its own spreadsheet link, tab name, **and layout**. Switch between them with
+the tabs under the header; add a new one with **+ Add section**, change the current
+one's link/layout with **Change link**, or delete any tab you don't need anymore with
+the **×** on it (you'll be asked to confirm — this only removes it from the app, never
+touches the actual spreadsheet). These are remembered in the browser
+(`localStorage`), so each device/browser you use keeps its own list — add the same
+sections again on any new device or browser you take attendance from. You always need
+at least one section, so the last remaining one can't be deleted.
+
+**Two class types to choose from when adding a section:**
+- **Theory** — your original layout: Serial in A, ID in B, Name in C, one date per
+  column D→AE (28 possible dates), attendance mark read from column AG.
+- **Lab** — matches your lab-class sheet: same Serial/ID/Name in A–C, but one date per
+  column D→Q (14 possible dates), and the attendance mark read from column S instead.
+
+Either way, students always start at row 5, and the app automatically finds wherever
+the *last real student* is — however many rows that sheet has, and however a "total"
+or summary row right after the last student is arranged, since that row has no ID or
+name of its own and gets skipped automatically. You never need to tell the app how
+many students a sheet has.
+
+If a sheet you use is arranged differently from either of these two, tell me the exact
+columns/rows and I can add a third class type.
 
 **Absence warnings:** when you open a date to take attendance, each student who missed
 recent classes gets a small badge next to their name, based on consecutive classes
@@ -83,20 +107,17 @@ CLIENT_ID: "your-client-id.apps.googleusercontent.com",
 DEFAULT_SHEET_LABEL: "Section A",
 DEFAULT_SPREADSHEET_ID: "16j8MJ9roVxDaYpLeK6syVE08Upp3qXqVifK-ikmrb2Y", // already filled in
 DEFAULT_SHEET_NAME: "Sheet1", // must match your actual tab name exactly
+DEFAULT_LAYOUT: "normal", // "normal" = Theory, "lab" = Lab
 ```
 
-This is just the **first** sheet you'll see when you open the app — add Section B, C,
-etc. from inside the app itself with **+ Add section**, no code changes needed for
-those.
+This is just the **first** sheet you'll see when you open the app — add your lab
+sheet, Section B, C, etc. from inside the app itself with **+ Add section** (picking
+**Theory** or **Lab** there), no code changes needed for those.
 
-The row/column numbers (`FIRST_STUDENT_ROW`, `LAST_DATE_COL`, `MARK_COL`, etc.) apply
-to **every** section sheet you add, so all your section sheets need the same layout
-(serials in A, IDs in B, names in C, dates in row 4 from D onward, AG reserved for the
-attendance percentage). Only change them if your sheet structure is different.
-
-> If your class list ever grows past row 44, or you need more than 28 date columns
-> (D→AE), update `LAST_STUDENT_ROW` / `LAST_DATE_COL` in `config.js` to match, and move
-> `MARK_COL` further right if it would now overlap a date column.
+The two class-type presets (`LAYOUT_PRESETS.normal` and `LAYOUT_PRESETS.lab`) at the
+top of `config.js` define the columns each type uses. You shouldn't need to touch
+these unless a sheet's layout is genuinely different from both — see the class-type
+descriptions above for exactly what each preset expects.
 
 ## 4. Deploy on GitHub Pages
 
@@ -129,14 +150,16 @@ trailing path) is listed under **Authorized JavaScript origins**.
 
 ## Adding or switching sections
 
-- **+ Add section**: give it a label (e.g. "Section B"), paste the full Google Sheet
-  link (or just the ID), and the tab name — then **Save**. It's added to the tabs and
-  becomes active immediately.
-- **Change link**: edit the currently active section's link/tab without adding a new
-  one — handy if you paste the wrong sheet or rename a tab.
+- **+ Add section**: give it a label (e.g. "Lab — 3rd Year"), paste the full Google
+  Sheet link (or just the ID), the tab name, and pick **Theory** or **Lab** — then
+  **Save**. It's added to the tabs and becomes active immediately.
+- **Change link**: edit the currently active section's link, tab, or class type
+  without adding a new one — handy if you paste the wrong sheet, rename a tab, or
+  picked the wrong class type by mistake.
 - Click any tab to switch to that section; the roster and dates reload automatically.
-- Removing a section (from the **Change link** dialog) only removes it from this
-  browser's list — it never touches the spreadsheet itself.
+- Delete a section with the **×** on its tab (you'll be asked to confirm first) — this
+  only removes it from this browser's list, never touches the spreadsheet. At least
+  one section always has to remain.
 
 ## Mobile
 
@@ -149,12 +172,12 @@ phone browser's "Add to Home Screen" option after opening the site.
 
 ## Notes / limitations
 
-- The sheet only has 28 date columns (D→AE) as built — good for roughly one month:
-  once all 28 are used, extend `LAST_DATE_COL` in `config.js` and add columns in
-  the sheet.
+- Theory sheets have 28 possible date columns (D→AE); lab sheets have 14 (D→Q).
+  Once all of a sheet's date columns are used, extend `lastDateCol` for that layout in
+  `config.js` and add matching columns in the sheet.
 - Sign-in uses your own Google account's permissions — anyone you don't want
   editing the sheet shouldn't be given this app's link and sign in with an editor
-  account. If several instructors share the roster, each just signs in with their
-  own editor-access Google account.
+  account. If several instructors share a roster, each just signs in with their own
+  editor-access Google account.
 - No student data is stored anywhere except your Google Sheet — the app itself has
   no database.

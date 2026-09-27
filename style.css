@@ -286,3 +286,16 @@ body {
   .brand-name { display: none; }
   .panel-title { font-size: 1.15rem; }
 }
+
+/* ---------- Layout picker (add/edit sheet modal) ---------- */
+.layout-options { display: flex; flex-direction: column; gap: 8px; }
+.layout-option {
+  display: flex; align-items: flex-start; gap: 10px;
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+  cursor: pointer;
+}
+.layout-option input { margin-top: 3px; accent-color: var(--accent); flex-shrink: 0; }
+.layout-option strong { display: block; font-size: 0.88rem; }
+.layout-option small { display: block; color: var(--ink-soft); font-size: 0.78rem; margin-top: 2px; line-height: 1.4; }
+.layout-option:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.field-hint { font-family: -apple-system, sans-serif; font-size: 0.78rem; color: var(--ink-soft); margin: 10px 0 0; line-height: 1.4; }

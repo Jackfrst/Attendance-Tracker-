@@ -46,6 +46,24 @@
     <input type="text" id="sheetUrlInput" class="text-input" placeholder="https://docs.google.com/spreadsheets/d/..." />
     <label class="field-label">Tab name (bottom of the sheet)</label>
     <input type="text" id="sheetTabInput" class="text-input" placeholder="Sheet1" />
+    <label class="field-label">Class type</label>
+    <div id="layoutOptions" class="layout-options">
+      <label class="layout-option">
+        <input type="radio" name="layoutType" value="normal" checked />
+        <span>
+          <strong>Theory</strong>
+          <small>Serial–ID–Name in A–C, dates D→AE, mark from AG. Rows grow automatically.</small>
+        </span>
+      </label>
+      <label class="layout-option">
+        <input type="radio" name="layoutType" value="lab" />
+        <span>
+          <strong>Lab</strong>
+          <small>Serial–ID–Name in A–C, dates D→Q, mark from S. Rows grow automatically.</small>
+        </span>
+      </label>
+    </div>
+    <p class="field-hint">Changing the class type of an existing section only changes how the app reads/writes it — it never edits the sheet's existing columns. However many students you have, and wherever a "total" row sits right after the last one, the app finds the real last student automatically.</p>
     <p id="sheetModalStatus" class="status-line"></p>
     <div class="modal-actions">
       <button id="sheetModalCancel" class="btn btn-ghost">Cancel</button>
