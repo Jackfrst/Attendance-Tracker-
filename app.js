@@ -36,6 +36,14 @@ function colToLetter(col) {
   return s;
 }
 
+
+// A date column counts as "already recorded" only if at least one student
+// cell holds a real present mark ("1"). Stray formulas, zeros or blanks in
+// an untouched column must not block a new date.
+function columnHasAttendance(values) {
+  return values.some((r) => r && r[0] !== undefined && r[0].toString().trim() === "1");
+}
+
 function pad2(n) { return String(n).padStart(2, "0"); }
 
 // Sheet/tab names with spaces or special characters (e.g. "CSE 4102 Lab A")
@@ -448,6 +456,10 @@ async function loadRosterAndDates() {
     const sheetRow = L.firstStudentRow + i;
     const id = (row[L.idCol - 1] || "").toString().trim();
     const name = (row[L.nameCol - 1] || "").toString().trim();
+    const serialTxt = (row[L.serialCol - 1] || "").toString().trim();
+    // The summary row right after the last student (e.g. "Total") is not a
+    // student — stop here so it is never read, shown or overwritten.
+    if (/total/i.test(id) || /total/i.test(name) || /total/i.test(serialTxt)) break;
     if (!id && !name) continue;
     roster.push({ row: sheetRow, serial: (row[L.serialCol - 1] || i + 1).toString(), id, name });
     detectedLastRow = sheetRow;
@@ -509,7 +521,7 @@ async function handleDateChosen() {
       currentColIndex = L.firstDateCol + matchIndex;
       const colLetter = colToLetter(currentColIndex);
       const existing = await getRange(`${quoteSheet(p.sheetName)}!${colLetter}${L.firstStudentRow}:${colLetter}${L.lastStudentRow}`);
-      const hasData = existing.some((r) => r[0] !== undefined && r[0].toString().trim() !== "");
+      const hasData = columnHasAttendance(existing);
       if (hasData) {
         await showAlreadyRecorded(existing);
       } else {
@@ -681,9 +693,9 @@ async function submitAttendance() {
 
   try {
     const existing = await getRange(`${quoteSheet(p.sheetName)}!${colLetter}${L.firstStudentRow}:${colLetter}${L.lastStudentRow}`);
-    const hasData = existing.some((r) => r[0] !== undefined && r[0].toString().trim() !== "");
+    const hasData = columnHasAttendance(existing);
     if (hasData) {
-      el("takeStatus").textContent = "Attendance for this date was just saved elsewhere, so this submission was blocked to avoid overwriting it.";
+      el("takeStatus").textContent = `Attendance for this date was just saved elsewhere, so this submission was blocked to avoid overwriting it. (Column ${colLetter}, rows ${L.firstStudentRow}-${L.lastStudentRow} already contain present marks.)`;
       el("submitBtn").disabled = false;
       return;
     }
