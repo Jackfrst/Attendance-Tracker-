@@ -703,7 +703,10 @@ async function submitAttendance() {
     el("takeStatus").textContent = "Saving…";
     const boxes = document.querySelectorAll(".present-toggle");
     const byRow = {};
-    boxes.forEach((cb) => { byRow[cb.dataset.row] = cb.checked ? "1" : ""; });
+    // Write a real number 1 (not the text "1") so the cell is numeric —
+    // Sheets' RAW value-input mode stores values exactly as their JSON
+    // type, so this has to be an actual number, not a quoted string.
+    boxes.forEach((cb) => { byRow[cb.dataset.row] = cb.checked ? 1 : ""; });
     const values = [];
     for (let r = L.firstStudentRow; r <= L.lastStudentRow; r++) {
       values.push([byRow[r] !== undefined ? byRow[r] : ""]);
